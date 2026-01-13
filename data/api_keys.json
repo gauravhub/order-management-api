@@ -1,19 +1,5 @@
-{
-    "api_keys": [
-        {
-            "key": "dev-key-12345",
-            "description": "Development API key",
-            "active": true
-        },
-        {
-            "key": "prod-key-67890",
-            "description": "Production API key",
-            "active": true
-        },
-        {
-            "key": "test-key-abcde",
-            "description": "Testing API key",
-            "active": true
-        }
-    ]
-}
+[
+    "ZGV2LWtleS0xMjM0NQ==",
+    "cHJvZC1rZXktNjc4OTA=",
+    "dGVzdC1rZXktYWJjZGU="
+]

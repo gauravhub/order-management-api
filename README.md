@@ -13,15 +13,17 @@ A FastAPI REST API for querying order management database. The API exposes datab
 
 ## Authentication
 
-All API endpoints (except `/`, `/docs`, and `/redoc`) require HTTP Basic Authentication using an API key.
+All API endpoints (except `/`, `/docs`, and `/redoc`) require an API key in the `X-API-Key` header.
 
 **How to use:**
-- **Username**: Can be any value (ignored)
-- **Password**: Your API key from `data/api_keys.json`
+- **Header**: `X-API-Key: <base64-encoded-api-key>`
+- Simply send the base64-encoded key in the custom header - no colon or username needed
+- **Note**: Header name is case-insensitive (e.g., `X-API-Key`, `x-api-key`, `X-Api-Key` all work)
 
 **Example using curl:**
 ```bash
-curl -u "any-username:dev-key-12345" http://localhost:8000/api/customer?email=test@example.com
+# Use the base64-encoded key in the X-API-Key header
+curl -H "X-API-Key: ZGV2LWtleS0xMjM0NQ==" http://localhost:8000/api/customer?email=test@example.com
 ```
 
 **Example using Python requests:**
@@ -30,14 +32,14 @@ import requests
 response = requests.get(
     "http://localhost:8000/api/customer",
     params={"email": "test@example.com"},
-    auth=("any-username", "dev-key-12345")
+    headers={"X-API-Key": "ZGV2LWtleS0xMjM0NQ=="}  # Base64-encoded key
 )
 ```
 
-**Default API Keys** (in `data/api_keys.json`):
-- `dev-key-12345` - Development API key
-- `prod-key-67890` - Production API key
-- `test-key-abcde` - Testing API key
+**Default API Keys** (base64-encoded in `data/api_keys.json`):
+- `ZGV2LWtleS0xMjM0NQ==` - Development API key (decodes to: dev-key-12345)
+- `cHJvZC1rZXktNjc4OTA=` - Production API key (decodes to: prod-key-67890)
+- `dGVzdC1rZXktYWJjZGU=` - Testing API key (decodes to: test-key-abcde)
 
 ⚠️ **Security Note**: Change the default API keys in `data/api_keys.json` before deploying to production!
 

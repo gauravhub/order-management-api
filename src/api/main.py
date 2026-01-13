@@ -4,9 +4,7 @@ import json
 from pathlib import Path
 from typing import Optional
 
-from fastapi import Depends, FastAPI, HTTPException, Query, Security, status
-from fastapi.responses import JSONResponse
-from fastapi.security import HTTPBasic, HTTPBasicCredentials
+from fastapi import Depends, FastAPI, Header, HTTPException, Query, status
 
 from src.config import Configuration
 from src.services.database import DatabaseService
@@ -15,15 +13,12 @@ from src.services.database import DatabaseService
 config = Configuration()
 db_service = DatabaseService(config)
 
-# HTTP Basic Authentication
-security = HTTPBasic()
-
 # Load API keys from file
-def load_api_keys() -> dict:
-    """Load API keys from JSON file.
+def load_api_keys() -> set:
+    """Load base64-encoded API keys from JSON file.
     
     Returns:
-        Dictionary mapping API keys to their metadata
+        Set of valid API keys (base64-encoded strings)
     """
     project_root = Path(__file__).parent.parent.parent
     api_keys_file = project_root / "data" / "api_keys.json"
@@ -31,25 +26,22 @@ def load_api_keys() -> dict:
     try:
         with open(api_keys_file, 'r') as f:
             data = json.load(f)
-            # Create a set of active API keys for quick lookup
-            active_keys = {
-                key_info["key"]: key_info 
-                for key_info in data.get("api_keys", [])
-                if key_info.get("active", False)
-            }
-            return active_keys
+            # Create a set of API keys for quick lookup
+            if isinstance(data, list):
+                return set(data)
+            return set()
     except FileNotFoundError:
         print(f"WARNING: API keys file not found at {api_keys_file}")
-        return {}
+        return set()
     except json.JSONDecodeError as e:
         print(f"ERROR: Failed to parse API keys file: {e}")
-        return {}
+        return set()
 
 
 # Cache API keys in memory
-_api_keys_cache: Optional[dict] = None
+_api_keys_cache: Optional[set] = None
 
-def get_api_keys() -> dict:
+def get_api_keys() -> set:
     """Get API keys (cached)."""
     global _api_keys_cache
     if _api_keys_cache is None:
@@ -57,34 +49,34 @@ def get_api_keys() -> dict:
     return _api_keys_cache
 
 
-def verify_api_key(credentials: HTTPBasicCredentials = Security(security)) -> str:
-    """Verify API key from HTTP Basic authentication.
+def verify_api_key(x_api_key: str = Header(..., alias="X-API-Key")) -> str:
+    """Verify API key from X-API-Key header.
+    
+    Checks if the provided API key (base64-encoded) matches any key in the allowed list.
     
     Args:
-        credentials: HTTP Basic credentials (username is ignored, password is the API key)
+        x_api_key: API key from X-API-Key header (base64-encoded)
     
     Returns:
         The API key if valid
     
     Raises:
-        HTTPException: If API key is invalid
+        HTTPException: If API key is invalid or missing
     """
     api_keys = get_api_keys()
-    api_key = credentials.password  # Use password field as API key
     
-    if not api_key or api_key not in api_keys:
+    if not x_api_key or x_api_key not in api_keys:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid API key",
-            headers={"WWW-Authenticate": "Basic"},
+            detail="Invalid or missing API key",
         )
     
-    return api_key
+    return x_api_key
 
 
 app = FastAPI(
     title="Order Management API",
-    description="REST API for querying order management database (HTTP Basic Auth required)",
+    description="REST API for querying order management database (X-API-Key header required)",
     version="0.1.0"
 )
 
@@ -109,7 +101,7 @@ async def startup_event():
 async def find_customer(
     email: str = Query(default="", description="Customer email address"),
     customer_id: str = Query(default="", description="Customer ID"),
-    api_key: str = Depends(verify_api_key)
+    _api_key: str = Depends(verify_api_key)  # Verified but not used in function
 ) -> dict:
     """Find a customer by email or customer ID.
     
@@ -138,7 +130,7 @@ async def find_customer(
 @app.get("/api/order")
 async def find_order(
     order_no: str = Query(..., description="Order number (e.g., ORD00009998)"),
-    api_key: str = Depends(verify_api_key)
+    _api_key: str = Depends(verify_api_key)  # Verified but not used in function
 ) -> dict:
     """Find an order by order number.
     
@@ -164,7 +156,7 @@ async def find_order(
 @app.get("/api/transaction")
 async def find_transaction(
     transaction_id: str = Query(..., description="Transaction ID to search for"),
-    api_key: str = Depends(verify_api_key)
+    _api_key: str = Depends(verify_api_key)  # Verified but not used in function
 ) -> dict:
     """Find a transaction by transaction ID.
     
@@ -190,7 +182,7 @@ async def find_transaction(
 @app.get("/api/transaction/order/{order_no}")
 async def get_transaction_for_order(
     order_no: str,
-    api_key: str = Depends(verify_api_key)
+    _api_key: str = Depends(verify_api_key)  # Verified but not used in function
 ) -> dict:
     """Get transaction information for an order.
     
@@ -216,7 +208,7 @@ async def get_transaction_for_order(
 @app.get("/api/refund/order/{order_no}")
 async def get_refund_for_order(
     order_no: str,
-    api_key: str = Depends(verify_api_key)
+    _api_key: str = Depends(verify_api_key)  # Verified but not used in function
 ) -> dict:
     """Get refund information for an order.
     

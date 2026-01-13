@@ -1,7 +1,5 @@
 """Configuration class for database settings."""
 
-from pathlib import Path
-
 
 class Configuration:
     """Simple configuration class for database path."""

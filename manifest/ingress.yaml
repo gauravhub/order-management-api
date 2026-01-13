@@ -3,15 +3,18 @@ kind: Ingress
 metadata:
   name: order-management-api-ingress
   namespace: default
+  annotations:
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}]'
 spec:
   # Uses the IngressClass with EKS AutoMode controller
-  # Can be omitted if using the default IngressClass
   ingressClassName: alb
   rules:
   - http:
       paths:
       - path: /
-        pathType: ImplementationSpecific
+        pathType: Prefix
         backend:
           service:
             name: order-management-api

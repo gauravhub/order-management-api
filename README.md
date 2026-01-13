@@ -5,12 +5,45 @@ A FastAPI REST API for querying order management database. The API exposes datab
 ## Features
 
 - REST API endpoints for querying customers, orders, transactions, and refunds
+- HTTP Basic Authentication with API keys
 - Automatic database initialization from JSON files on startup
 - Self-contained Docker image with all data files included
 - Swagger/OpenAPI documentation at `/docs`
 - Built with FastAPI and SQLite
 
+## Authentication
+
+All API endpoints (except `/`, `/docs`, and `/redoc`) require HTTP Basic Authentication using an API key.
+
+**How to use:**
+- **Username**: Can be any value (ignored)
+- **Password**: Your API key from `data/api_keys.json`
+
+**Example using curl:**
+```bash
+curl -u "any-username:dev-key-12345" http://localhost:8000/api/customer?email=test@example.com
+```
+
+**Example using Python requests:**
+```python
+import requests
+response = requests.get(
+    "http://localhost:8000/api/customer",
+    params={"email": "test@example.com"},
+    auth=("any-username", "dev-key-12345")
+)
+```
+
+**Default API Keys** (in `data/api_keys.json`):
+- `dev-key-12345` - Development API key
+- `prod-key-67890` - Production API key
+- `test-key-abcde` - Testing API key
+
+⚠️ **Security Note**: Change the default API keys in `data/api_keys.json` before deploying to production!
+
 ## API Endpoints
+
+All endpoints below require HTTP Basic Authentication (see [Authentication](#authentication) section above).
 
 ### Customer
 - `GET /api/customer?email=...` - Find customer by email
@@ -27,8 +60,9 @@ A FastAPI REST API for querying order management database. The API exposes datab
 ### Refund
 - `GET /api/refund/order/{order_no}` - Get refund for an order
 
-### Documentation
-- `GET /docs` - Swagger UI documentation
+### Documentation (No Authentication Required)
+- `GET /` - Root endpoint with API information
+- `GET /docs` - Swagger UI documentation (includes "Authorize" button for testing)
 - `GET /redoc` - ReDoc documentation
 
 ## Docker Deployment

@@ -182,21 +182,29 @@ docker push \
 
 ### Step 2: Update Configuration Files
 
+**⚠️ IMPORTANT: Before deploying, you must replace the placeholders in the manifest files with your actual AWS account details.**
+
 Update the manifests with your AWS account details:
 
 ```bash
 cd manifest
 
-# Update cluster.yaml with your preferred region
-# Edit cluster.yaml and change the region if needed (default: us-west-2)
+# Set your AWS account ID and region
+export ACCOUNT_ID="YOUR_AWS_ACCOUNT_ID"  # e.g., "829040135710"
+export REGION="us-west-2"  # or your preferred region
+
+# Update cluster.yaml with your preferred region (if different from us-west-2)
+# Edit cluster.yaml and change the region if needed
 
 # Update deployment.yaml with your ECR image URI
 sed -i "s/ACCOUNT_ID.dkr.ecr.REGION.amazonaws.com/$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/g" deployment.yaml
 ```
 
-Or manually edit `manifest/deployment.yaml` and replace:
-- `ACCOUNT_ID` with your AWS account ID
-- `REGION` with your AWS region (e.g., `us-west-2`)
+**Or manually edit `manifest/deployment.yaml`** and replace the placeholders in the image field:
+- Replace `ACCOUNT_ID` with your AWS account ID (12-digit number)
+- Replace `REGION` with your AWS region (e.g., `us-west-2`, `us-east-1`)
+
+Example: Change `ACCOUNT_ID.dkr.ecr.REGION.amazonaws.com/order-management-api:latest` to `829040135710.dkr.ecr.us-west-2.amazonaws.com/order-management-api:latest`
 
 **Manifest Files:**
 - `cluster.yaml` - eksctl configuration for creating EKS AutoMode cluster

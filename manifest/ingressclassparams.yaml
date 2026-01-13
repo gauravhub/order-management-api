@@ -1,0 +1,13 @@
+apiVersion: eks.amazonaws.com/v1
+kind: IngressClassParams
+metadata:
+  name: alb
+spec:
+  scheme: internet-facing
+  # Optional: SSL certificate ARNs (uncomment and set if you have certificates)
+  # certificateARNs:
+  #   - arn:aws:acm:REGION:ACCOUNT_ID:certificate/CERT_ID
+  # Optional: Custom tags for AWS resources
+  # tags:
+  #   Environment: production
+  #   Application: order-management-api

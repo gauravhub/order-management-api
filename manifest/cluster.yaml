@@ -1,0 +1,40 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: order-management-cluster
+  region: us-east-1
+  version: "1.28"
+
+# EKS AutoMode configuration
+# AutoMode automatically manages EC2 instances, compute autoscaling,
+# pod networking, load balancing, storage, and cluster DNS
+autoModeConfig:
+  enabled: true
+  # Optional: Leave nodePools unspecified to use default node pools
+  # (general-purpose and system). To disable default node pools, set to []
+  # nodePools: []
+  # Optional: eksctl will create a node role if not specified
+  # nodeRoleARN: arn:aws:iam::ACCOUNT_ID:role/eksctl-order-management-cluster-NodeInstanceRole
+
+# IAM configuration
+iam:
+  withOIDC: true
+  # Note: EKS AutoMode includes built-in load balancer management,
+  # so we don't need a service account for AWS Load Balancer Controller
+
+# VPC configuration (optional - uses default if not specified)
+vpc:
+  cidr: "10.0.0.0/16"
+  nat:
+    gateway: HighlyAvailable
+
+# CloudWatch logging
+cloudWatch:
+  clusterLogging:
+    enableTypes: ["*"]
+
+# Tags
+tags:
+  Environment: production
+  Application: order-management-api

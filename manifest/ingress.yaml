@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: order-management-api-ingress
+  namespace: default
+spec:
+  # Uses the IngressClass with EKS AutoMode controller
+  # Can be omitted if using the default IngressClass
+  ingressClassName: alb
+  rules:
+  - http:
+      paths:
+      - path: /
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: order-management-api
+            port:
+              number: 80

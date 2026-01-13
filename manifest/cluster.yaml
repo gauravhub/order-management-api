@@ -3,8 +3,11 @@ kind: ClusterConfig
 
 metadata:
   name: order-management-cluster
-  region: us-east-1
-  version: "1.28"
+  region: us-west-2
+  version: "1.34"
+  tags:
+    Environment: development
+    Application: order-management-api
 
 # EKS AutoMode configuration
 # AutoMode automatically manages EC2 instances, compute autoscaling,
@@ -23,18 +26,15 @@ iam:
   # Note: EKS AutoMode includes built-in load balancer management,
   # so we don't need a service account for AWS Load Balancer Controller
 
-# VPC configuration (optional - uses default if not specified)
+# VPC configuration - optimized for development
+# Using Single NAT gateway instead of HighlyAvailable to reduce costs
 vpc:
   cidr: "10.0.0.0/16"
   nat:
-    gateway: HighlyAvailable
+    gateway: Single
 
-# CloudWatch logging
+# CloudWatch logging - minimal for development
+# Only enable essential log types to reduce costs
 cloudWatch:
   clusterLogging:
-    enableTypes: ["*"]
-
-# Tags
-tags:
-  Environment: production
-  Application: order-management-api
+    enableTypes: ["api", "audit"]

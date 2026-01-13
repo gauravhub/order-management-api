@@ -143,7 +143,7 @@ Deploy the Order Management API to Amazon EKS using AutoMode. EKS AutoMode autom
 ### Prerequisites
 
 1. **AWS CLI** installed and configured
-2. **eksctl** version 0.195.0 or greater ([Installation Guide](https://eksctl.io/introduction/installation/))
+2. **eksctl** version 0.221.0 or greater ([Installation Guide](https://eksctl.io/introduction/installation/))
 3. **kubectl** installed
 4. **Docker** installed
 5. AWS account with permissions to create EKS clusters, ECR repositories, and manage EC2/VPC resources
@@ -188,7 +188,7 @@ Update the manifests with your AWS account details:
 cd manifest
 
 # Update cluster.yaml with your preferred region
-# Edit cluster.yaml and change the region if needed (default: us-east-1)
+# Edit cluster.yaml and change the region if needed (default: us-west-2)
 
 # Update deployment.yaml with your ECR image URI
 sed -i "s/ACCOUNT_ID.dkr.ecr.REGION.amazonaws.com/$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/g" deployment.yaml
@@ -196,13 +196,21 @@ sed -i "s/ACCOUNT_ID.dkr.ecr.REGION.amazonaws.com/$ACCOUNT_ID.dkr.ecr.$REGION.am
 
 Or manually edit `manifest/deployment.yaml` and replace:
 - `ACCOUNT_ID` with your AWS account ID
-- `REGION` with your AWS region (e.g., `us-east-1`)
+- `REGION` with your AWS region (e.g., `us-west-2`)
+
+**Manifest Files:**
+- `cluster.yaml` - eksctl configuration for creating EKS AutoMode cluster
+- `deployment.yaml` - Kubernetes Deployment for the application
+- `service.yaml` - Kubernetes Service (ClusterIP)
+- `ingressclassparams.yaml` - IngressClassParams for ALB configuration
+- `ingressclass.yaml` - IngressClass using EKS AutoMode controller
+- `ingress.yaml` - Ingress resource for public ALB endpoint
 
 ### Step 3: Create EKS AutoMode Cluster
 
 ```bash
 # Ensure you have the correct eksctl version
-eksctl version  # Should be 0.195.0 or greater
+eksctl version  # Should be 0.221.0 or greater
 
 # Create the EKS AutoMode cluster
 eksctl create cluster -f cluster.yaml
@@ -225,7 +233,7 @@ The cluster creation process will:
 kubectl get nodes
 
 # Verify cluster status
-aws eks describe-cluster --name order-management-cluster --region us-east-1
+aws eks describe-cluster --name order-management-cluster --region us-west-2
 ```
 
 ### Step 5: Deploy the Application
